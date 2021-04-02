@@ -1,58 +1,59 @@
 import React, { useState, useEffect } from "react";
-import { createStyles, makeStyles } from "@material-ui/core/styles";
-import {
-  Paper,
-  Table,
-  TableBody,
-  TableCell,
-  TableContainer,
-  TableHead,
-  TableRow,
-} from "@material-ui/core";
+import EnhancedTable from "./InventoryTable/InvenntoryTable";
 
-const useStyles = makeStyles((theme) => createStyles({}));
+const fields = {
+  brand: {
+    type: "string",
+  },
+  model: {
+    type: "string",
+  },
+  description: {
+    type: "string",
+  },
+  ratedPower: {
+    type: "string",
+  },
+  currentType: {
+    type: "string",
+  },
+  efficiency: {
+    type: "number",
+  },
+  provider: {
+    type: "string",
+  },
+  discount: {
+    type: "number",
+  },
+  pvp: {
+    type: "number",
+  },
+  price: {
+    type: "number",
+  },
+};
 
-const InventoryView = () => {
-  const classes = useStyles();
-  const [entities, setEntities] = useState({});
+async function fetchInventoryData(resourceName, offset, limit) {
+  const res = await fetch(
+    `http://188.166.172.4/${
+      resourceName || "inverters"
+    }?limit=${limit}&offset=${offset}`
+  );
+  const json = await res.json();
+  return json;
+}
 
-  useEffect(() => {
-    async function fetchInventoryData() {
-      const res = await fetch("http://188.166.172.4/inverters");
-      const json = await res.json();
-      setEntities(json);
-    }
-    fetchInventoryData();
-  }, []);
-
+const InventoryView = (props) => {
+  const { resourceName } = props;
   return (
-    <TableContainer component={Paper}>
-      <Table size="small" aria-label="a dense table">
-        <TableHead>
-          <TableRow>
-            <TableCell>Dessert (100g serving)</TableCell>
-            <TableCell align="right">Calories</TableCell>
-            <TableCell align="right">Fat&nbsp;(g)</TableCell>
-            <TableCell align="right">Carbs&nbsp;(g)</TableCell>
-            <TableCell align="right">Protein&nbsp;(g)</TableCell>
-          </TableRow>
-        </TableHead>
-        <TableBody>
-          {entities.results?.map((row) =>
-            _renderRow(row)
-          )}
-        </TableBody>
-      </Table>
-    </TableContainer>
+    <EnhancedTable
+      title={"Inverters"}
+      resourceName={resourceName}
+      fields={fields}
+      requestNewPage={fetchInventoryData}
+    />
   );
 };
 
 export default InventoryView;
-
-const _renderRow = row => {
-    return (
-      <TableRow key={row.name}>
-        <TableCell align="right">{row.calories}</TableCell>
-      </TableRow>
-    );
-}
