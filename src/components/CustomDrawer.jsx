@@ -7,8 +7,8 @@ import Divider from "@material-ui/core/Divider";
 import ListItem from "@material-ui/core/ListItem";
 import ListItemIcon from "@material-ui/core/ListItemIcon";
 import ListItemText from "@material-ui/core/ListItemText";
-import InboxIcon from "@material-ui/icons/MoveToInbox";
 import MailIcon from "@material-ui/icons/Mail";
+import Catalog from "./Catalog";
 
 const drawerWidth = 240;
 
@@ -41,7 +41,7 @@ export default function CustomDrawer() {
       <Toolbar />
       <div className={classes.drawerContainer}>
         <List>
-          {["Inbox"].map((text) => (
+          {["Clientes", "Presupuesto", "Facturas"].map((text) => (
             <ListItem button key={text}>
               <ListItemIcon>
                 <MailIcon />
@@ -51,16 +51,7 @@ export default function CustomDrawer() {
           ))}
         </List>
         <Divider />
-        <List>
-          {["All mail"].map((text) => (
-            <ListItem button key={text}>
-              <ListItemIcon>
-                <InboxIcon />
-              </ListItemIcon>
-              <ListItemText primary={text} />
-            </ListItem>
-          ))}
-        </List>
+        <Catalog />
       </div>
     </Drawer>
   );
