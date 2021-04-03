@@ -27,9 +27,9 @@ const useStyles = makeStyles((theme) =>
   })
 );
 
-export default function CustomDrawer() {
+export default function CustomDrawer(props) {
   const classes = useStyles();
-
+  const { changeCatalogView } = props;
   return (
     <Drawer
       className={classes.drawer}
@@ -51,7 +51,7 @@ export default function CustomDrawer() {
           ))}
         </List>
         <Divider />
-        <Catalog />
+        <Catalog changeCatalogView={changeCatalogView} />
       </div>
     </Drawer>
   );

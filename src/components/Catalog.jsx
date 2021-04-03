@@ -1,16 +1,11 @@
 import React, { useState, useEffect } from "react";
 
-import {
-  Typography,
-  Box,
-  List,
-  ListItem,
-  ListItemIcon,
-  ListItemText,
-} from "@material-ui/core";
-import InboxIcon from "@material-ui/icons/MoveToInbox";
+import { Typography, Box, List } from "@material-ui/core";
 
-const Catalog = () => {
+import CatalogItem from "./CatalogItem";
+
+const Catalog = (props) => {
+  const { changeCatalogView } = props;
   const [entitiesDescription, setEntitiesDescription] = useState({});
 
   useEffect(() => {
@@ -40,12 +35,12 @@ const Catalog = () => {
       </div>
       <List>
         {Object.keys(entitiesDescription).map((text) => (
-          <ListItem button key={text}>
-            <ListItemIcon>
-              <InboxIcon />
-            </ListItemIcon>
-            <ListItemText primary={text} />
-          </ListItem>
+          <CatalogItem
+            displayableName={text}
+            changeCatalogView={() =>
+              changeCatalogView(text, entitiesDescription[text])
+            }
+          />
         ))}
       </List>
     </React.Fragment>

@@ -1,4 +1,4 @@
-import React from "react";
+import React, { useState } from "react";
 import "./App.css";
 import { createStyles, makeStyles } from "@material-ui/core/styles";
 import AppBar from "@material-ui/core/AppBar";
@@ -38,14 +38,27 @@ function CustomAppBar() {
 
 function App() {
   const classes = useStyles();
+  const [state, setState] = useState({
+    resourceName: null,
+    fields: {},
+  });
   return (
     <div className={classes.root}>
       <CssBaseline />
       <CustomAppBar />
-      <CustomDrawer />
+      <CustomDrawer
+        changeCatalogView={(resourceName, fields) =>
+          setState({ resourceName, fields })
+        }
+      />
       <main className={classes.content}>
         <Toolbar />
-        <InventoryView />
+        {state.resourceName && (
+          <InventoryView
+            resourceName={state.resourceName}
+            fields={state.fields}
+          />
+        )}
       </main>
     </div>
   );
