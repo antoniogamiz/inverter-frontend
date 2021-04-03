@@ -40,8 +40,9 @@ export default function EnhancedTable(props) {
   const classes = useStyles();
   const [selected, setSelected] = React.useState([]);
   const [page, setPage] = React.useState(0);
-  const [rows, setRows] = React.useState({ rows: [], total: 0 });
+  const [data, setData] = React.useState({ rows: [], total: 0 });
   const [rowsPerPage, setRowsPerPage] = React.useState(5);
+  const { total, rows } = data;
 
   const handleSelectAllClick = (event) => {
     if (event.target.checked) {
@@ -72,17 +73,7 @@ export default function EnhancedTable(props) {
     setSelected(newSelected);
   };
 
-  const handleChangePage = (event, newPage) => {
-    setPage(newPage);
-    const offset = rowsPerPage * page;
-    const limit = rowsPerPage;
-    requestNewPage(resourceName, offset, limit).then((result) =>
-      setRows({
-        rows: result.results,
-        total: result.total,
-      })
-    );
-  };
+  const handleChangePage = (event, newPage) => setPage(newPage);
 
   const handleChangeRowsPerPage = (event) => {
     setRowsPerPage(parseInt(event.target.value, 10));
@@ -92,21 +83,19 @@ export default function EnhancedTable(props) {
   const isSelected = (name) => selected.indexOf(name) !== -1;
 
   const emptyRows =
-    rowsPerPage - Math.min(rowsPerPage, rows.total - page * rowsPerPage);
+    rowsPerPage - Math.min(rowsPerPage, total - page * rowsPerPage);
 
-  const offset = rowsPerPage * page;
-  const limit = rowsPerPage;
-
-  useEffect(
-    () =>
-      requestNewPage(resourceName, offset, limit).then((result) =>
-        setRows({
-          rows: result.results,
-          total: result.total,
-        })
-      ),
-    [resourceName, requestNewPage, offset, limit]
-  );
+  useEffect(() => {
+    async function fetchData() {
+      let offset = rowsPerPage * page;
+      const result = await requestNewPage(resourceName, offset, rowsPerPage);
+      setData({
+        rows: [...result.results],
+        total: result.total,
+      });
+    }
+    fetchData();
+  }, [resourceName, requestNewPage, page, rowsPerPage]);
 
   return (
     <div className={classes.root}>
@@ -123,44 +112,42 @@ export default function EnhancedTable(props) {
               classes={classes}
               numSelected={selected.length}
               onSelectAllClick={handleSelectAllClick}
-              rowCount={rows.total}
+              rowCount={total}
               fields={fields}
             />
             <TableBody>
-              {rows.rows
-                .slice(page * rowsPerPage, page * rowsPerPage + rowsPerPage)
-                .map((row, index) => {
-                  const isItemSelected = isSelected(row.id);
-                  const labelId = `enhanced-table-checkbox-${index}`;
+              {rows.map((row, index) => {
+                const isItemSelected = isSelected(row.id);
+                const labelId = `enhanced-table-checkbox-${index}`;
 
-                  return (
-                    <TableRow
-                      hover
-                      onClick={(event) => handleClick(event, row.id)}
-                      role="checkbox"
-                      aria-checked={isItemSelected}
-                      tabIndex={-1}
-                      key={index}
-                      selected={isItemSelected}
+                return (
+                  <TableRow
+                    hover
+                    onClick={(event) => handleClick(event, row.id)}
+                    role="checkbox"
+                    aria-checked={isItemSelected}
+                    tabIndex={-1}
+                    key={index}
+                    selected={isItemSelected}
+                  >
+                    <TableCell padding="checkbox">
+                      <Checkbox
+                        checked={isItemSelected}
+                        inputProps={{ "aria-labelledby": labelId }}
+                      />
+                    </TableCell>
+                    <TableCell
+                      component="th"
+                      id={labelId}
+                      scope="row"
+                      padding="none"
                     >
-                      <TableCell padding="checkbox">
-                        <Checkbox
-                          checked={isItemSelected}
-                          inputProps={{ "aria-labelledby": labelId }}
-                        />
-                      </TableCell>
-                      <TableCell
-                        component="th"
-                        id={labelId}
-                        scope="row"
-                        padding="none"
-                      >
-                        {Object.values(row)[1]}
-                      </TableCell>
-                      {_renderRow(row)}
-                    </TableRow>
-                  );
-                })}
+                      {Object.values(row)[1]}
+                    </TableCell>
+                    {_renderRow(row)}
+                  </TableRow>
+                );
+              })}
               {emptyRows > 0 && (
                 <TableRow style={{ height: 33 * emptyRows }}>
                   <TableCell colSpan={12} />
@@ -172,7 +159,7 @@ export default function EnhancedTable(props) {
         <TablePagination
           rowsPerPageOptions={[5, 10, 25]}
           component="div"
-          count={rows.total}
+          count={total}
           rowsPerPage={rowsPerPage}
           page={page}
           onChangePage={handleChangePage}
